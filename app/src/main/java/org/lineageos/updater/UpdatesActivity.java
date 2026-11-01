@@ -39,6 +39,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -250,14 +251,14 @@ public class UpdatesActivity extends UpdatesListActivity implements UpdateImport
     }
 
     @Override
-    protected void onPause() {
+    protected void onDestroy() {
         if (importDialog != null) {
             importDialog.dismiss();
             importDialog = null;
             mUpdateImporter.stopImport();
         }
 
-        super.onPause();
+        super.onDestroy();
     }
 
     @Override
@@ -322,10 +323,16 @@ public class UpdatesActivity extends UpdatesListActivity implements UpdateImport
                 .create();
 
         importDialog.show();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     public void onImportCompleted(Update update) {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (isDestroyed()) {
+            return;
+        }
+
         if (importDialog != null) {
             importDialog.dismiss();
             importDialog = null;
